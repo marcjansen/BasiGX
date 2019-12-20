@@ -52,17 +52,18 @@ Ext.define('BasiGX.util.Animate', {
          *
          * @param {Object} feature The ol.feature to flash
          * @param {Integer} duration The duration to animate in milliseconds
+         * @param {ol.Map} m The OpenLayers map.
          * @return {Object} listenerKey The maps postcompose listener
          */
-        flashFeature: function(feature, duration) {
-            var map = BasiGX.util.Map.getMapComponent().getMap();
+        flashFeature: function(feature, duration, m) {
+            var map = m || BasiGX.util.Map.getMapComponent().getMap();
             var start = new Date().getTime();
             var listenerKey;
+            var flashGeom = feature.getGeometry().clone();
 
             function animate(event) {
                 var vectorContext = event.vectorContext;
                 var frameState = event.frameState;
-                var flashGeom = feature.getGeometry().clone();
                 var elapsed = frameState.time - start;
                 var elapsedRatio = elapsed / duration;
                 // radius will be 5 at start and 30 at end.
@@ -79,15 +80,9 @@ Ext.define('BasiGX.util.Animate', {
                     var isPoly = flashGeom instanceof ol.geom.Polygon ||
                         flashGeom instanceof ol.geom.MultiPolygon;
 
-                    var r = 255;
                     var g = parseInt((200 * opacity), 10);
-                    var b = 0;
-                    var color = 'rgba(' +
-                        r + ',' +
-                        g + ',' +
-                        b + ',' +
-                        opacity +
-                    ')';
+
+                    var color = 'rgba(255, ' + g + ', 0, ' + opacity + ')';
                     if (isPoint) {
                         flashStyle = new ol.style.Style({
                             image: new ol.style.Circle({
@@ -152,13 +147,14 @@ Ext.define('BasiGX.util.Animate', {
          * @param {Object} feature The ol.feature to flash
          * @param {Integer} duration The duration to animate in milliseconds
          * @param {Object} olEvt The ol.event where the mouse has been clicked
+         * @param {ol.Map} m The OpenLayers map.
          * @return {Object} listenerKey The maps postcompose listener
          */
-        materialFill: function(feature, duration, olEvt) {
+        materialFill: function(feature, duration, olEvt, m) {
             if (feature.get('__animating')) {
                 return;
             }
-            var map = BasiGX.util.Map.getMapComponent().getMap();
+            var map = m || BasiGX.util.Map.getMapComponent().getMap();
             var resolution = map.getView().getResolution();
             var flashGeom = feature.getGeometry().clone();
             var isPoint = flashGeom instanceof ol.geom.Point ||
@@ -266,13 +262,14 @@ Ext.define('BasiGX.util.Animate', {
          * @param {Object} feature The ol.feature to flash
          * @param {Integer} duration The duration to animate in milliseconds
          * @param {Boolean} followSegments If we shall follow line segments
+         * @param {ol.Map} m The OpenLayers map.
          * @return {Object} listenerKey The maps postcompose listener
          */
-        followVertices: function(feature, duration, followSegments) {
+        followVertices: function(feature, duration, followSegments, m) {
             if (feature.get('__animating')) {
                 return;
             }
-            var map = BasiGX.util.Map.getMapComponent().getMap();
+            var map = m || BasiGX.util.Map.getMapComponent().getMap();
             var flashGeom = feature.getGeometry().clone();
             var isPoint = flashGeom instanceof ol.geom.Point ||
                 flashGeom instanceof ol.geom.MultiPoint;
